@@ -54,7 +54,7 @@ import java.util.*
  * Its azureAdB2CHostName is "fabrikamb2c.b2clogin.com"
  * Its tenantName is "fabrikamb2c.onmicrosoft.com"
  */
-object B2CConfiguration {
+object B2CBioConfiguration {
     /**
      * Name of the policies/user flows in your B2C tenant.
      * See https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-policies for more info.

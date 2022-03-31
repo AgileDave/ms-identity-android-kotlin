@@ -17,4 +17,10 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_single_account">SingleAccountActivity</string>
+
+    <!-- Biometric Stuff -->
+    <string name="prompt_info_title">B2C BioMetric MFA App</string>
+    <string name="prompt_info_subtitle">Please verify your identity to refresh access</string>
+    <string name="prompt_info_description">B2C BioMetric MFA is using Android biometric authentication in order to access your stored account to refresh access</string>
+    <string name="prompt_info_use_app_password">Skip This and Log In Manually</string>
 </resources>
