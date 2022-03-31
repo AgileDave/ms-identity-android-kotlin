@@ -16,5 +16,9 @@
             android:id="@+id/nav_b2c"
             android:icon="@drawable/ic_multiple_account_24dp"
             android:title="B2C Mode" />
+        <item
+            android:id="@+id/nav_b2c_bio"
+            android:icon="@drawable/ic_multiple_account_24dp"
+            android:title="B2C BioMetric Mode" />
     </group>
 </menu>

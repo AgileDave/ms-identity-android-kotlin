@@ -19,7 +19,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     internal enum class AppFragment {
         SingleAccount,
         MultipleAccount,
-        B2C
+        B2C,
+        B2CBio
     }
 
     private var mCurrentFragment: AppFragment? = null
@@ -71,6 +72,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     setCurrentFragment(AppFragment.B2C)
                 }
 
+                if (id == R.id.nav_b2c_bio) {
+                    setCurrentFragment(AppFragment.B2CBio)
+                }
+
                 drawer_layout.removeDrawerListener(this)
             }
 
@@ -107,6 +112,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 supportActionBar!!.title = "MB2C Mode"
                 return
             }
+
+            MainActivity.AppFragment.B2CBio -> {
+                supportActionBar!!.title = "MB2C BioMetric Mode"
+                return
+            }
+
         }
     }
 
@@ -124,6 +135,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             MainActivity.AppFragment.B2C -> {
                 attachFragment(B2CModeFragment())
+                return
+            }
+
+            MainActivity.AppFragment.B2CBio -> {
+                attachFragment(B2CBioModeFragment())
                 return
             }
         }
