@@ -72,6 +72,7 @@ class B2CBioModeFragment : Fragment() {
     private var theFrag = this
     private var userid = ""
 
+    // Biometric vars...
     private lateinit var biometricPrompt: BiometricPrompt
     private var cryptographyManager = CryptographyManager()
     private val ciphertextWrapper
@@ -129,6 +130,10 @@ class B2CBioModeFragment : Fragment() {
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         policy_list.setAdapter(dataAdapter)
         dataAdapter.notifyDataSetChanged()
+
+        // handler for the "Run User Flow" button
+        //  this does not deal with biometrics
+        //   a 'classic' login experience will be presented
         btn_runUserFlow.setOnClickListener(View.OnClickListener {
             if (b2cApp == null) {
                 return@OnClickListener
@@ -143,10 +148,19 @@ class B2CBioModeFragment : Fragment() {
 
             b2cApp!!.acquireToken(parameters)
         })
+
+        //determine if the Use Bio button will be lit up or not
         val canAuthenticate = context?.let { BiometricManager.from(it).canAuthenticate() }
         if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
 
+            // if the user can use BioMetrics, the button is enabled or not
             btn_useBioMetrics!!.isEnabled=true
+
+            // handler for "Run Flow and Use Bio"
+            //  this will run the user flow classically (prompt for username/pwd
+            //   then after successful authN, it will prompt for biometric (fingerprint)
+            //   and store encrypted key (username) in key store if bio matches.
+            //   Storing of key happens in authInteractiveBioCallback callback.
             btn_useBioMetrics.setOnClickListener(View.OnClickListener {
                 if (b2cApp == null) {
                     return@OnClickListener
@@ -167,6 +181,7 @@ class B2CBioModeFragment : Fragment() {
             })
         }
 
+        // handler for the "Check Bio and Acquire Token Silently" button
         btn_acquireTokenSilently.setOnClickListener(View.OnClickListener {
             if (b2cApp == null) {
                 return@OnClickListener
@@ -187,6 +202,8 @@ class B2CBioModeFragment : Fragment() {
             }
         })
 
+        // handler for the "Sign Out" button
+        //  this also clears out the Key Store for biometric login
         btn_removeAccount.setOnClickListener(View.OnClickListener {
             if (b2cApp == null) {
                 return@OnClickListener
@@ -206,6 +223,8 @@ class B2CBioModeFragment : Fragment() {
                     })
         })
 
+        // handler for the "Turn Off Bio" button
+        //  this also clears out all keys from key store
         btn_stopBioMetrics.setOnClickListener(View.OnClickListener {
             txt_log.setText("Disabled BioMetrics MFA")
             cryptographyManager.removeKeyStore("biometric_sample_encryption_key")
@@ -213,6 +232,9 @@ class B2CBioModeFragment : Fragment() {
             loadAccounts()
         })
 
+        // handler for the "Enable Bio MFA" button
+        //  this button would simulate when a user says they want to enable biometrics
+        //   the current refresh token will then be gated from being used until the user passes a fingerprint scan
         btn_enableBio.setOnClickListener(View.OnClickListener {
             txt_log.setText("Enabling bio metrics for MFA")
 
@@ -259,6 +281,9 @@ class B2CBioModeFragment : Fragment() {
         initializeUI()
     }
 
+    // Called by "Check Bio and Acquire Token Silently"
+    //  this checks the key store for the encrypted value (the user name) and ensures that it matches
+    //   the current user. If so, it allows token acquisition; otherwise it doesn't
     private fun decryptServerTokenFromStorage(authResult: BiometricPrompt.AuthenticationResult) {
         ciphertextWrapper?.let { textWrapper ->
             authResult.cryptoObject?.cipher?.let {
@@ -319,14 +344,17 @@ class B2CBioModeFragment : Fragment() {
             }
         }/* User canceled the authentication *//* Exception when communicating with the STS, likely config issue *//* Exception inside MSAL, more info inside MsalError.java *//* Failed to acquireToken *//* Successfully got a token, use it to call a protected resource - MSGraph */
 
-    /* display result info */
-
     /* Reload account asynchronously to get the up-to-date list. */
     /**
      * Callback used for interactive request.
      * If succeeds we use the access token to call the Microsoft Graph.
      * Does not check cache.
      */
+
+    // callback for authN and then storing key in keystore
+    // Callback check if bio is enabled on device
+    //  if enabled, then creates encrypted secret value (username) and stores in key store
+    //  this is then used to validate that bio user is user for the token
     private val authInteractiveBioCallback: AuthenticationCallback
         private get() = object : AuthenticationCallback {
             var accountName = ""
@@ -355,6 +383,7 @@ class B2CBioModeFragment : Fragment() {
                 /* Reload account asynchronously to get the up-to-date list. */`loadAccounts`()
             }
 
+            // store the secret encrypted value
             private fun encryptAndStoreServerToken(authResult: BiometricPrompt.AuthenticationResult) {
                 authResult.cryptoObject?.cipher?.apply {
                     accountName?.let { acctName ->
@@ -399,6 +428,7 @@ class B2CBioModeFragment : Fragment() {
         }
 
 
+    // callback for 'classic' authN experience (username pwd login)
     private val authInteractiveCallback: AuthenticationCallback
         private get() = object : AuthenticationCallback {
             override fun onSuccess(authenticationResult: IAuthenticationResult) {

@@ -66,6 +66,9 @@ class B2CBioUser private constructor() {
             var sub = getSubjectFromAccount(accounts[0])
             var tfp = getB2CPolicyNameFromAccount(accounts[0])
 
+            // IMPORTANT: user id (secret encrypted value) comprises the subject (oid) along with the policy
+            //  this way, same user doesn't reuse token from a different policy
+            //  if this isn't an issue, secret key could be just oid
             val userid = sub + "-" + tfp!!.toLowerCase()
             return userid ?: getSubjectFromAccount(accounts[0])
         }
